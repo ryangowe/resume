@@ -1,54 +1,66 @@
 \section{\faUsers\ 工作经历}
 
+\datedsubsection{WeRide 感知组研发工程师}{2024.06 - 至今}
 
-\subsection{图森未来}
-    \datedline{研发工程师——高精地图}{2023.07.03 - 2024.03.12}
-    \datedline{工程部高精地图实习生}{2022.07.11 - 2022.11.25}
-    \paragraph{高精地图 SDK TSMap 的维护和开发}
-        \begin{itemize}
-            \item 
-                TSMap 是所有图森车上软件使用高精地图的 C++ SDK，通过 pybind 提供 python 接口。总计被 100 多软件包所直接或间接依赖。
-                在车上计算资源有限的情况下高效地为算法程序提供它们所需的地图数据和信息。
-                大部分时间是我在进行维护和 feature 开发。
-                保障了路测稳定和算法使用。
-            \item 
-                开发 Perception Drivable Map 组件。
-                它能够将 2D 地图分割为可行驶区域和非可行驶区域，并用一个矩阵表示。
-                使 perception 算法能够快速判断点是否在可行驶区域内。
-            \item 
-                开发 Planning Drivable Map 组件。
-                能够快速计算路点法线上左右两侧的物理可连续行驶距离。
-                % 在 Frenet 坐标系上，使用可行驶区域的公共边，通过 BFS 将路径拓展为封闭的左右连续可行驶的多边形，以此来支持快速在大量的纵向距离进行查询。
-                能够用平均 3 ms 完成 1000 m 上 5000 个点的查询。
-                同时允许异步更新并存储任意路线上的结果。
-        \end{itemize}
+\paragraph{AEB 障碍物感知融合}
+\begin{itemize}
+      \item 参与奇瑞 \textit{single Orin Y} 车型和广汽 \textit{G300} 车型的 AEB 功能开发，设计融合算法。
+      \item ASIL-B 要求通过输入冗余实现容错。
+            设计多来源融合算法，融合视觉端到端模型、视觉 AEB 模型和 Radar 检测（\textit{G300}）。
+      \item 基于 Kalman Filter 融合多来源的检测。通过量测噪声解耦各个输入的差异。通过预测对齐时间戳。
+      \item Orin Y 车型交付达到100\% UT 覆盖，仿真 5kh 无 fp，通过 C-NCAP 考试。
+\end{itemize}
 
-    \paragraph{地图产线}
-        \begin{itemize}
-            \item 
-                地图产线是输入感知数据，最终输出地图数据的微服务地图构建系统。
-                我负责开发的主要为支持输入车道线矢量数据，输出包含车道、路口、拓扑关系、物理元素关系等地图元素的母库规格数据，无人工参与，无状态的一系列服务。
-            \item 
-                开发自动构建、制图后处理服务。
-                自动构建服务从车道线构建车道、车道拓扑关系等地图元素。
-                制图后处理服务输入经过人工质检的自动构建输出，构建路口、路口拓扑关系、物理元素关系等地图元素，能够支持差分更新构建。
-                需要大量计算的数据处理部分使用 C++，与其他服务交互部分使用 Python，并通过 pybind 连接两种语言。
-                通过 opentelemetry 接入可观测性平台，便于快速发现和溯源问题。
-                通过 jenkins 实现 CI/CD。
-                使用 GoogleTest 和 pytest 进行单测。
-                完成负责的各服务的详细设计，使用合理算法高效构建地图元素和关系。
-            \item 
-                开发格式转换、构建预处理、任务接边等服务。
-        \end{itemize}
+\paragraph{LiDAR freespace 后处理}
+\begin{itemize}
+      \item 雨天场景下高反牌（路牌、锥桶等）会导致 LiDAR 感知产生强烈误检。
+            设计基于规则的后处理来移除误检。
+            通过 PCA 拟合高反牌点云所在平面，移除由高反牌造成的 freespace 误检。
+            并结合视觉模型输出进行补偿。
+      \item 实现基于 grid tracking 的 freespace记忆模块。
+            通过盲区穿越判定策略补全车后可行驶区域，
+            相比 Log-Odds 累计概率结果稳定且可预测。
+            用于支持三点掉头等复杂场景；能够过滤偶发的误检。
+      \item 设计用于车端HMI渲染的 freespace 点云到 linestring 的转换算法。
+            基于fs记忆模块提供的稳定结果，
+            通过不同的密度对角度进行量化，采样结果求凸包，最后在凸包顶点间补充 fs 点丰富细节。
+            使车端HMI能够渲染 fs 轮廓线，并兼顾一定精度。
+\end{itemize}
 
-    \paragraph{地图数据编译程序 Great Map Builder 的维护和开发}
-        \begin{itemize}
-            \item 
-                Great Map Builder 是高精地图的数据编译软件。
-                输入经过人工标注的矢量数据，自动构建出车道、路口、拓扑关系、物理元素关系等地图元素和属性，并导出可供软件直接使用的二进制 Protobuf 文件。
-            \item 
-                Great Map Builder 是我一人维护。完成修复了生产制图总遇到的各种 bug，保障了在洋山港、曹妃甸、澳洲、日本等地的建图。
-            \item 
-                根据算法和地图需求，拓展了地图元素类型，支持表达双线型边界、非车道可行驶区域等，同时保证了向前和向后兼容。
-        \end{itemize}
+\paragraph{NeuralMap 车道线后处理}
+\begin{itemize}
+      \item NeuralMap 是 WeRide compass 无图项目的车道线感知模块。
+            用于与奇瑞、博世等合作的所有 L2 无图车型。
+      \item 根据下游反馈和需求开发并调整后处理功能。
+            赋值分合流、车道线类型等属性。
+      \item 基于  Kalman Filter 识别并平滑 crosswalk，为 HMI 提供稳定的结果。
+      \item 开发基于bag的自动化标注工具,
+            实现自车行为(车道居中/偏离、变道、停止线前静止/起步/穿越)
+            和交互车辆行为(静止、加减速、切入、绕行)的自动识别和标注。
+\end{itemize}
+
+
+
+\datedsubsection{TuSimple 研发工程师——高精地图 full time \& intern }{2022.07 - 2024.03}
+
+\paragraph{高精地图 SDK TSMap 的维护和开发}
+\begin{itemize}
+      \item TSMap 是 TuSimple 的高精地图 C++ SDK。同时通过 pybind11 提供 Python 接口。
+      \item 开发 Perception Drivable Map。
+            提供接口给感知快速获取表达可行驶区域的布尔矩阵。
+      \item 开发 Planning Drivable Map。
+            计算 freespace 距离。利用局部性异步计算结果以满足实时性要求。
+      \item 根据下游场景进行一些优化。例如提供批量查询曲率接口，优化了批量查询的复杂度。
+\end{itemize}
+
+\paragraph{地图产线}
+\begin{itemize}
+      \item 参与用于地图量产的微服务架构的新地图产线开发。
+      \item 完成大部分车道线构建相关服务的开发。
+            流程输入车道线矢量数据，输出包含车道、路口、拓扑关系、物理元素关系等地图元素的母库规格数据。
+            接入可观测性平台，便于快速发现和溯源问题。
+      \item 维护旧地图编译工具。
+            根据算法和地图需求，拓展了地图元素类型，支持表达双线型边界、非车道可行驶区域等，且保证了向前和向后兼容。
+\end{itemize}
+
 
