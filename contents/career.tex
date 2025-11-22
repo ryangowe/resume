@@ -1,69 +1,83 @@
-\section{\faUsers\ WORK EXPERIENCE}
+\section{\faUsers\ Work Experience}
+
+\datedsubsection{WeRide, Perception R\&D Engineer}{2024.06 - Present}
+
+\paragraph{AEB Obstacle Perception Fusion}
+\begin{itemize}
+      \item Participated in the development of AEB functionality for Chery \textit{single Orin Y} model and GAC \textit{G300} model,
+            designed multi-sensor fusion algorithms.
+      \item ASIL-B requirements mandate fault tolerance through input redundancy.
+            Designed multi-source fusion algorithm integrating vision end-to-end model,
+            vision AEB model, and Radar detection (\textit{G300}).
+      \item Fused multi-source detections based on Kalman Filter.
+            Decoupled sensor-specific characteristics through measurement noise modeling.
+            Aligned timestamps through temporal prediction.
+      \item Orin Y model delivery achieved 100\% UT coverage,
+            5k hours simulation with zero false positives, and passed C-NCAP assessment.
+\end{itemize}
+
+\paragraph{LiDAR Freespace Post-processing}
+\begin{itemize}
+      \item High-reflectivity boards (road signs, traffic cones, etc.)
+            cause strong false alarms in LiDAR perception under rainy conditions.
+            Designed rule-based post-processing to remove FP.
+            Fit the plane where high-reflectivity board point clouds are located through PCA,
+            remove freespace false positives caused by high-reflectivity boards.
+            Compensate with vision model outputs.
+      \item Implemented freespace memory module based on occupancy grid tracking.
+            Completed freespace behind the ego vehicle through blind spot traversal determination strategy,
+            providing stable and predictable results compared to Log-Odds probability accumulation.
+            Supported complex maneuvers such as three-point turns and filtered sporadic false detections.
+      \item Designed conversion algorithm from freespace point cloud to linestring for in-vehicle HMI rendering.
+            Based on stable results provided by freespace memory module,
+            quantize angles with adaptive density, compute convex hull of sampled results,
+            then enrich details by adding freespace points between convex hull vertices.
+            Enable in-vehicle HMI to render freespace contour lines while maintaining accuracy.
+\end{itemize}
+
+\paragraph{NeuralMap Lane Line Post-processing}
+\begin{itemize}
+      \item NeuralMap is the lane detection module of WeRide compass mapless architecture.
+            Used in all L2 mapless vehicle models in collaboration with Chery, Bosch, etc.
+      \item Developed and adjusted post-processing features
+            based on downstream feedback and requirements.
+            Assigned attributes such as merge/diverge, lane marking type, etc.
+      \item Recognized crosswalks and smoothed results based on Kalman Filter,
+            providing stable results for HMI rendering.
+      \item Developed bag-based labeling tool,
+            implemented automatic recognition and labeling of ego vehicle behaviors
+            (lane centering/off-centering, lane change, stop line stationary/start/crossing)
+            and interactive vehicle behaviors (stationary, acceleration/deceleration, cut-in, bypass).
+\end{itemize}
 
 
-\subsection{TUSIMPLE}
-    \datedline{Map Engine Engineer}{2023.07.03 - 2024.03.12}
-    \datedline{Map Intern}{2022.07.11 - 2022.11.25}
-    \paragraph{Map SDK \textit{TSMap}}
-        \begin{itemize}
-            \item 
-                TSMap is a C++ map SDK used by vehicle software in TuSimple.
-                It is used by over 100 packages.
-                % It efficiently provides the required map data and information 
-                The SDK runs on the limited computing resources available onboard vehicles
-                and provides required data in efficiency.
-                It has passed more than a thousand drive-out tests during my maintenance.
-            \item 
-                Developed the Perception Drivable Map feature.
-                It segments a 2D map into drivable and undrivable areas, 
-                presented as a matrix.
-                This matrix helps perception algorithms efficiently determine whether a point is within the drivable area.
-            \item 
-                Developed the Planning Drivable Map feature.
-                It efficiently calculates the length of contiguous drivable areas in physical on both sides.
-                It can process 5000 queries in 1000 meters within 3 ms and can perform calculations asynchronously.
-        \end{itemize}
 
-    \paragraph{\textit{Map Pipeline}}
-        \begin{itemize}
-            \item 
-                Map Pipeline is a microservices system for map building
-                that consumes raw sensor data, and produces map data.
-                I am responsible for the development of a series of services that are
-                human intervention-free and stateless.
-                These services support processing input vector data 
-                and outputting 
-                basedata including lanes, intersections, topology, phiscal element relations.
-            \item 
-                Developed major services in the procedure that input vector data and output well-structured map data.
-                They support updating map data with differential content.
-                Used C++ for computationally heavy modules
-                and Python for communication with other services.
-                Used pybind to integrate the two parts.
-                Used jenkins for CI/CD.
-                Applied unit testing with GoogleTest and pytest.
-            \item 
-                Developed a few services to support
-                converting data formats for data produced in other pipelines,
-                filling missing fields in raw input,
-                and merging divided map-building tasks.
-        \end{itemize}
+\datedsubsection{TuSimple, R\&D Engineer - HD Map (full time \& intern)}{2022.07 - 2024.03}
 
-    \paragraph{Data compiler \textit{Great Map Builder}}
-        \begin{itemize}
-            \item 
-                Great Map Builder is a map data compiler
-                that consumes annotated vector data
-                and produces binary protobuf files.
-                These files includes lanes, intersections, topology, physical element relations, 
-                and can be directly loaded by the map SDK.
-            \item 
-                I am responsible for the maintenance and development of Great Map Builder 
-                as the primary developer after joining the team.
-                I have developed features and fixed bugs in map building.
-            \item 
-                Extended the types of map elements.
-                Added support for describing double line bounds, physical drivable areas, etc.
-                Guranteed forward and backward compatibility.
-        \end{itemize}
+\paragraph{Maintenance and Development of HD Map SDK TSMap}
+\begin{itemize}
+      \item TSMap is TuSimple's HD map C++ SDK,
+            which also provides Python interface through pybind11.
+      \item Developed Perception Drivable Map.
+            Provides interface for perception to quickly obtain boolean matrix representing drivable area.
+      \item Developed Planning Drivable Map.
+            Compute signed distance field to freespace boundaries.
+            Utilize spatial locality to asynchronously compute results meeting real-time requirements.
+      \item Performed optimizations based on downstream use cases.
+            For example, provided batch curvature query interface, optimized algorithmic complexity for batch queries.
+\end{itemize}
 
+\paragraph{Map Production Pipeline}
+\begin{itemize}
+      \item Participated in the development of new map production pipeline with microservice architecture
+            for large-scale map production.
+      \item Developed lane-level map construction related services.
+            Pipeline inputs lane line vector data,
+            outputs HD map basedata containing map elements such as lanes, intersections,
+            lane-level topology, physical element relationships, etc.
+            Integrated with observability platform for rapid issue discovery and root cause analysis.
+      \item Maintained legacy map compilation tool and developed new features.
+            Extended map element types according to perception and planning requirements,
+            supporting representation of double-line boundaries, non-lane drivable areas, etc.,
+            while ensuring forward and backward compatibility.
+\end{itemize}
