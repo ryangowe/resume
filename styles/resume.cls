@@ -22,7 +22,7 @@
 \RequirePackage{fontspec}
 % Main document font
 \setmainfont[
-  Path = fonts/Main/ ,
+  Path = assets/fonts/Main/ ,
   Extension = .otf ,
   UprightFont = *-regular ,
   BoldFont = *-bold ,
