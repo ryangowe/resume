@@ -4,39 +4,40 @@
 
 \paragraph{AEB 障碍物感知融合}
 \begin{itemize}
-      \item 参与奇瑞 \textit{single Orin Y} 车型和广汽 \textit{G300} 车型的 AEB 功能开发，设计融合算法。
-      \item ASIL-B 要求通过输入冗余实现容错。
-            设计多来源融合算法，融合视觉端到端模型、视觉 AEB 模型和 Radar 检测（\textit{G300}）。
-      \item 基于 Kalman Filter 融合多来源的检测。通过量测噪声解耦各个输入的差异。通过预测对齐时间戳。
-      \item Orin Y 车型交付达到100\% UT 覆盖，仿真 5kh 无 fp，通过 C-NCAP 考试。
+      \item 开发基于 Kalman Filter 的多来源障碍物融合算法，满足 ASIL-B 的冗余要求。
+      \item 构建不同来源的观测模型，以解耦不同来源输入的维度差异；
+            利用运动外推实现时间戳对齐，
+            并基于 Mahalanobis Gating 和匈牙利算法进行数据关联和更新。
+      \item 根据障碍物、车道线等路面信息的几何关系识别场景，针对模型的特定缺陷进行过滤或补偿。
+      \item 项目交付达到100\% UT DC\&SC 覆盖，仿真 5k hours 无误触发，通过 C-NCAP 测试。
 \end{itemize}
 
 \paragraph{LiDAR freespace 后处理}
 \begin{itemize}
-      \item 雨天场景下高反牌（路牌、锥桶等）会导致 LiDAR 感知产生强烈误检。
-            设计基于规则的后处理来移除误检。
-            通过 PCA 拟合高反牌点云所在平面，移除由高反牌造成的 freespace 误检。
-            并结合视觉模型输出进行补偿。
-      \item 实现基于 grid tracking 的 freespace记忆模块。
-            通过盲区穿越判定策略补全车后可行驶区域，
-            相比 Log-Odds 累计概率结果稳定且可预测。
-            用于支持三点掉头等复杂场景；能够过滤偶发的误检。
-      \item 设计用于车端HMI渲染的 freespace 点云到 linestring 的转换算法。
+      \item 移除特定障碍物误检。
+            针对高反射率物体（如雨天路牌）引发的感知噪声，
+            通过 PCA 拟合路牌所在的平面。
+            根据几何关系移除异常值，剔除可能的误检。
+            在删除区域结合视觉信号进行补偿。
+      \item 设计基于 grid tracking 的 freespace记忆模块，
+            用于支持三点掉头等复杂场景；并能够过滤偶发的误检。
+            基于盲区进出的几何关系和离散计数器控制 tracker 生命周期。
+            相比 Log-Odds 累计概率有更好的可解释性和更低延迟。
+      \item 设计用于车端HMI可视化渲染的 freespace 点云到 linestring 的转换算法。
             基于fs记忆模块提供的稳定结果，
-            通过不同的密度对角度进行量化，采样结果求凸包，最后在凸包顶点间补充 fs 点丰富细节。
-            使车端HMI能够渲染 fs 轮廓线，并兼顾一定精度。
+            采样关键点渲染 curb 轮廓线。
 \end{itemize}
 
 \paragraph{NeuralMap 车道线后处理}
 \begin{itemize}
-      \item NeuralMap 是 WeRide compass 无图项目的车道线感知模块。
-            用于与奇瑞、博世等合作的所有 L2 无图车型。
       \item 根据下游反馈和需求开发并调整后处理功能。
             赋值分合流、车道线类型等属性。
       \item 基于  Kalman Filter 识别并平滑 crosswalk，为 HMI 提供稳定的结果。
-      \item 开发基于bag的自动化标注工具,
-            实现自车行为(车道居中/偏离、变道、停止线前静止/起步/穿越)
-            和交互车辆行为(静止、加减速、切入、绕行)的自动识别和标注。
+      \item 为 Auto Labeling Pipeline 实现标注部分自车行为
+            （车道居中/偏离、变道、停止线前静止/起步/穿越）
+            和交互车辆行为
+            （静止、加减速、切入、绕行）
+            的功能。
 \end{itemize}
 
 
@@ -45,12 +46,15 @@
 
 \paragraph{高精地图 SDK TSMap 的维护和开发}
 \begin{itemize}
-      \item TSMap 是 TuSimple 的高精地图 C++ SDK。同时通过 pybind11 提供 Python 接口。
+      \item TSMap 是 TuSimple 的高精地图 C++ SDK。
+            通过 pybind11 提供 Python 接口。
+            通过 pimpl 方法提高 ABI Compatibility。
       \item 开发 Perception Drivable Map。
-            提供接口给感知快速获取表达可行驶区域的布尔矩阵。
+            提供给感知可以快速获取表达可行驶区域布尔矩阵的接口。
       \item 开发 Planning Drivable Map。
-            计算 freespace 距离。利用局部性异步计算结果以满足实时性要求。
-      \item 根据下游场景进行一些优化。例如提供批量查询曲率接口，优化了批量查询的复杂度。
+            计算 freespace 距离。利用空间相关性异步计算以满足实时性要求。
+      \item 根据下游场景的使用情况进行一些优化。
+            例如提供批量查询曲率接口，消除冗余计算，降低了批量查询的复杂度。
 \end{itemize}
 
 \paragraph{地图产线}
@@ -61,6 +65,7 @@
             接入可观测性平台，便于快速发现和溯源问题。
       \item 维护旧地图编译工具。
             根据算法和地图需求，拓展了地图元素类型，支持表达双线型边界、非车道可行驶区域等，且保证了向前和向后兼容。
+            另外通过网格吸附预处理点坐标，避免因浮点数精度问题在不同边界条件检查下产生矛盾。
 \end{itemize}
 
 
