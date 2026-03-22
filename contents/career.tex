@@ -4,80 +4,68 @@
 
 \paragraph{AEB Obstacle Perception Fusion}
 \begin{itemize}
-      \item Participated in the development of AEB functionality for Chery \textit{single Orin Y} model and GAC \textit{G300} model,
-            designed multi-sensor fusion algorithms.
-      \item ASIL-B requirements mandate fault tolerance through input redundancy.
-            Designed multi-source fusion algorithm integrating vision end-to-end model,
-            vision AEB model, and Radar detection (\textit{G300}).
-      \item Fused multi-source detections based on Kalman Filter.
-            Decoupled sensor-specific characteristics through measurement noise modeling.
-            Aligned timestamps through temporal prediction.
-      \item Orin Y model delivery achieved 100\% UT coverage,
-            5k hours simulation with zero false positives, and passed C-NCAP assessment.
+      \item Developed a multi-source obstacle fusion algorithm based on Kalman Filter to meet ASIL-B redundancy requirements.
+      \item Designed per-source measurement models to decouple dimensional differences across inputs;
+            used motion extrapolation for timestamp alignment,
+            and applied Mahalanobis gating with Hungarian algorithm for data association and update.
+      \item Identified driving scenarios from geometric relationships between obstacles, lane lines, and other road info,
+            then filtered or compensated for specific model defects accordingly.
+      \item Delivered with 100\% UT DC\&SC coverage, 5k hours simulation with zero false triggers, passed C-NCAP testing.
 \end{itemize}
 
 \paragraph{LiDAR Freespace Post-processing}
 \begin{itemize}
-      \item High-reflectivity boards (road signs, traffic cones, etc.)
-            cause strong false alarms in LiDAR perception under rainy conditions.
-            Designed rule-based post-processing to remove FP.
-            Fit the plane where high-reflectivity board point clouds are located through PCA,
-            remove freespace false positives caused by high-reflectivity boards.
-            Compensate with vision model outputs.
-      \item Implemented freespace memory module based on occupancy grid tracking.
-            Completed freespace behind the ego vehicle through blind spot traversal determination strategy,
-            providing stable and predictable results compared to Log-Odds probability accumulation.
-            Supported complex maneuvers such as three-point turns and filtered sporadic false detections.
-      \item Designed conversion algorithm from freespace point cloud to linestring for in-vehicle HMI rendering.
-            Based on stable results provided by freespace memory module,
-            quantize angles with adaptive density, compute convex hull of sampled results,
-            then enrich details by adding freespace points between convex hull vertices.
-            Enable in-vehicle HMI to render freespace contour lines while maintaining accuracy.
+      \item Removed specific false detections.
+            For perception noise caused by high-reflectivity objects (e.g., road signs in rain),
+            fit the plane where the sign sits via PCA,
+            removed outliers based on geometric relationships,
+            and compensated deleted regions with vision signals.
+      \item Designed an occupancy-grid-based freespace memory module
+            to support complex scenarios with perception blind spots (e.g., three-point turns) and filter sporadic false detections.
+            Split space into detectable regions vs.\ blind spots, managed tracker lifecycle based on this prior rather than pure time decay;
+            replaced Log-Odds with discrete counters for better interpretability and lower latency.
+      \item Designed a conversion algorithm from freespace point cloud to linestring for in-vehicle HMI curb rendering.
+            Sampled nearest points by polar angle, extracted key boundary points via convex hull,
+            then expanded outward with a 5m threshold on both sides to generate smooth linestrings.
 \end{itemize}
 
 \paragraph{NeuralMap Lane Line Post-processing}
 \begin{itemize}
-      \item NeuralMap is the lane detection module of WeRide compass mapless architecture.
-            Used in all L2 mapless vehicle models in collaboration with Chery, Bosch, etc.
-      \item Developed and adjusted post-processing features
-            based on downstream feedback and requirements.
-            Assigned attributes such as merge/diverge, lane marking type, etc.
-      \item Recognized crosswalks and smoothed results based on Kalman Filter,
-            providing stable results for HMI rendering.
-      \item Developed bag-based labeling tool,
-            implemented automatic recognition and labeling of ego vehicle behaviors
-            (lane centering/off-centering, lane change, stop line stationary/start/crossing)
-            and interactive vehicle behaviors (stationary, acceleration/deceleration, cut-in, bypass).
+      \item Developed and tuned post-processing features based on downstream feedback and requirements.
+            Assigned attributes like merge/diverge type, lane marking type, etc.
+      \item Identified and smoothed crosswalks using Kalman Filter, providing stable results for HMI.
+      \item Built auto-labeling features for the Auto Labeling Pipeline,
+            labeling ego vehicle behaviors
+            (lane centering/drifting, lane change, stationary/starting/crossing at stop lines)
+            and interacting vehicle behaviors
+            (stationary, accel/decel, cut-in, bypass).
 \end{itemize}
 
+\datedsubsection{TuSimple, R\&D Engineer -- HD Map (full time \& intern)}{2022.07 - 2024.03}
 
-
-\datedsubsection{TuSimple, R\&D Engineer - HD Map (full time \& intern)}{2022.07 - 2024.03}
-
-\paragraph{Maintenance and Development of HD Map SDK TSMap}
+\paragraph{HD Map SDK TSMap}
 \begin{itemize}
-      \item TSMap is TuSimple's HD map C++ SDK,
-            which also provides Python interface through pybind11.
-      \item Developed Perception Drivable Map.
-            Provides interface for perception to quickly obtain boolean matrix representing drivable area.
-      \item Developed Planning Drivable Map.
-            Compute signed distance field to freespace boundaries.
-            Utilize spatial locality to asynchronously compute results meeting real-time requirements.
-      \item Performed optimizations based on downstream use cases.
-            For example, provided batch curvature query interface, optimized algorithmic complexity for batch queries.
+      \item TSMap is TuSimple's HD map C++ SDK.
+            Provides Python bindings via pybind11.
+            Uses pimpl idiom for ABI compatibility.
+      \item Built Perception Drivable Map ---
+            an interface for perception to quickly get a boolean matrix of drivable area.
+      \item Built Planning Drivable Map ---
+            computes freespace distance, uses spatial locality for async computation to meet real-time needs.
+      \item Various downstream-driven optimizations,
+            e.g., batch curvature query interface that cuts redundant computation and reduces batch query complexity.
 \end{itemize}
 
 \paragraph{Map Production Pipeline}
 \begin{itemize}
-      \item Participated in the development of new map production pipeline with microservice architecture
-            for large-scale map production.
-      \item Developed lane-level map construction related services.
-            Pipeline inputs lane line vector data,
-            outputs HD map basedata containing map elements such as lanes, intersections,
-            lane-level topology, physical element relationships, etc.
-            Integrated with observability platform for rapid issue discovery and root cause analysis.
-      \item Maintained legacy map compilation tool and developed new features.
-            Extended map element types according to perception and planning requirements,
-            supporting representation of double-line boundaries, non-lane drivable areas, etc.,
-            while ensuring forward and backward compatibility.
+      \item Worked on a new microservice-based map production pipeline for mass production.
+      \item Built most lane-line construction services.
+            Pipeline takes lane line vector data as input,
+            outputs base-map-spec data with lanes, intersections, topology, physical element relationships, etc.
+            Integrated with observability platform for quick issue discovery and tracing.
+      \item Maintained legacy map compilation tool.
+            Extended map element types per algorithm and map needs ---
+            supporting double-line boundaries, non-lane drivable areas, etc. ---
+            while keeping forward and backward compatibility.
+            Also preprocessed point coordinates via grid snapping to avoid contradictions in boundary checks from floating-point precision issues.
 \end{itemize}
